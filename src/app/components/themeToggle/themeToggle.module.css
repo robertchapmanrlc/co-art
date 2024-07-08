@@ -1,0 +1,23 @@
+
+
+.toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+  height: 3rem;
+  width: auto;
+  margin: 0;
+  background-color: transparent;
+  border: none;
+}
+
+.toggle svg {
+  display: block;
+  position: relative;
+  fill: var(--toggle-background);
+}
