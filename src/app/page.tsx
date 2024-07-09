@@ -1,3 +1,5 @@
+
+import Canvas from "@/components/drawingCanvas/canvas";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -23,7 +25,7 @@ export default function Home() {
             <p>Player 4</p>
           </div>
         </section>
-        <canvas width={400} height={400} className={styles.drawingCanvas} />
+        <Canvas />
         <aside className={styles.art}>Art</aside>
       </div>
     </main>
