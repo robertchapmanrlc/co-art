@@ -5,10 +5,19 @@
 
 .mainContent {
   display: flex;
-  flex-direction: row;
+  flex-direction: column-reverse;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   gap: 2rem;
+  padding-bottom: 3rem;
+}
+
+@media (width > 1000px) {
+  .mainContent {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0;
+  }
 }
 
 .players {
@@ -42,8 +51,8 @@
 
 .art {
   border: 2px solid var(--clr-text);
-  width: 200px;
-  height: 200px;
+  min-width: 200px;
+  min-height: 200px;
   border-radius: 8px;
   text-align: center;
   align-content: center;
