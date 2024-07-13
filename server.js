@@ -15,7 +15,9 @@ app.prepare().then(() => {
   const io = new Server(httpServer);
 
   io.on('connection', (socket) => {
-    console.log('Connected');
+    socket.on('draw-line', ({ currentPoint, previousPoint, color }) => {
+      socket.broadcast.emit('draw-line', { currentPoint, previousPoint, color });
+    })
   })
 
   httpServer.once('error', (err) => {
