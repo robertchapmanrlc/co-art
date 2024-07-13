@@ -21,13 +21,30 @@ export default function Canvas() {
 
     const context = canvasRef.current?.getContext('2d');
 
+    socket.emit('client-ready');
+
     socket.on('draw-line', ({ currentPoint, color, previousPoint }: DrawLineProps) => {
       if (!context) return;
       drawLine({ previousPoint, currentPoint, color, context });
     });
 
+    socket.on('get-canvas-state', () => {
+      if (!canvasRef.current?.toDataURL()) return;
+      socket.emit("canvas-state", canvasRef.current.toDataURL());
+    });
+    
+    socket.on("canvas-state-from-server", (state: string) => {
+      const img = new Image();
+      img.src = state;
+      img.onload = () => {
+        context?.drawImage(img, 0, 0);
+      }
+    });
+
     return () => {
       socket.off('draw-line');
+      socket.off('get-canvas-state');
+      socket.off('canvas-state-from-server');
     };
   }, [canvasRef]);
 

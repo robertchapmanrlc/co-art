@@ -17,7 +17,15 @@ app.prepare().then(() => {
   io.on('connection', (socket) => {
     socket.on('draw-line', ({ currentPoint, previousPoint, color }) => {
       socket.broadcast.emit('draw-line', { currentPoint, previousPoint, color });
-    })
+    });
+
+    socket.on('client-ready', () => {
+      socket.broadcast.emit('get-canvas-state');
+    });
+
+    socket.on('canvas-state', (state) => {
+      socket.broadcast.emit('canvas-state-from-server', state);
+    });
   })
 
   httpServer.once('error', (err) => {
