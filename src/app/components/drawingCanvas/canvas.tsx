@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './canvas.module.css';
 import { useDraw } from "@/hooks/useDraw";
 import { socket } from '../../../socket';
@@ -8,7 +8,7 @@ import { drawLine } from '@/utils/drawLine';
 
 export default function Canvas() {
 
-  const { canvasRef, onMouseDown } = useDraw(createLine);
+  const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
   const color = '#00F';
 
@@ -41,20 +41,25 @@ export default function Canvas() {
       }
     });
 
+    socket.on('clear', clear);
+
     return () => {
       socket.off('draw-line');
       socket.off('get-canvas-state');
       socket.off('canvas-state-from-server');
+      socket.off('clear');
     };
-  }, [canvasRef]);
+  }, [canvasRef, clear]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      onMouseDown={onMouseDown}
-      width={400}
-      height={400}
-      className={styles.drawingCanvas}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        onMouseDown={onMouseDown}
+        width={400}
+        height={400}
+        className={styles.drawingCanvas}
+      />
+    </>
   );
 }

@@ -9,6 +9,16 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
 
   const onMouseDown = () => setMouseDown(true);
 
+  const clear = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    context.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
   useEffect(() => {
     if (!mouseDown) return;
     const handleMovement = (e: MouseEvent) => {
@@ -48,5 +58,5 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
   }, [mouseDown, onDraw])
   
 
-  return { canvasRef, onMouseDown };
+  return { canvasRef, onMouseDown, clear };
 };

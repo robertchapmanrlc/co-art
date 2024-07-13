@@ -43,12 +43,3 @@
   padding: 15px;
   border-radius: 50%;
 }
-
-.art {
-  border: 2px solid var(--clr-text);
-  min-width: 200px;
-  min-height: 200px;
-  border-radius: 8px;
-  text-align: center;
-  align-content: center;
-}

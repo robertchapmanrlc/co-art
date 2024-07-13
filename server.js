@@ -8,11 +8,37 @@ const port = 3000;
 
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
+let clearCanvasTimeout;
+let remainingTime = 30000;
+let broadcastInterval = 1000;
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer);
+
+  function startCanvasTimer() {
+    if (clearCanvasTimeout) {
+      clearTimeout(clearCanvasTimeout);
+    }
+
+    remainingTime = 30000;
+    clearCanvasTimeout = setTimeout(clearCanvas, remainingTime);
+  }
+
+  function clearCanvas() {
+    io.sockets.emit('clear');
+    startCanvasTimer();
+  }
+
+  setInterval(() => {
+    if (remainingTime > 0) {
+      remainingTime -= broadcastInterval;
+      io.sockets.emit('display-time', remainingTime/1000);
+    }
+  }, broadcastInterval);
+
+  startCanvasTimer();
 
   io.on('connection', (socket) => {
     socket.on('draw-line', ({ currentPoint, previousPoint, color }) => {

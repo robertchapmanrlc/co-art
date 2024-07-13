@@ -1,6 +1,7 @@
 
 import Canvas from "@/components/drawingCanvas/canvas";
 import styles from "./page.module.css";
+import ArtAside from "./components/artAside/artAside";
 
 export default function Home() {
   return (
@@ -26,7 +27,7 @@ export default function Home() {
           </div>
         </section>
         <Canvas />
-        <aside className={styles.art}>Art</aside>
+        <ArtAside />
       </div>
     </main>
   );
