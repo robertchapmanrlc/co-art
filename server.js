@@ -48,13 +48,16 @@ app.prepare().then(() => {
       io.to(room).emit('draw-line', { currentPoint, previousPoint, color });
     });
 
-    socket.on('enter-room', ({name, room}) => {
-      users = [...users, { name, room }];
-      socket.join(room);
-      const usersInRoom = roomUsers(room);
-      rooms[room] = {};
-      startCanvasTimer(room);
-      io.to(room).emit('users', usersInRoom );
+    socket.on('enter-room', ({ name, room }) => {
+      const id = socket.id
+      if (!users.find((user) => user.id === id)) {
+        users = [...users, { name, room, id }];
+        socket.join(room);
+        const usersInRoom = roomUsers(room);
+        rooms[room] = {};
+        startCanvasTimer(room);
+        io.to(room).emit('users', usersInRoom);
+      }
     });
 
     socket.on('client-ready', (room) => {
@@ -64,7 +67,16 @@ app.prepare().then(() => {
     socket.on('canvas-state', (state, room) => {
       io.to(room).emit('canvas-state-from-server', state);
     });
-  })
+
+    socket.on('disconnect', () => {
+      const removedUser = users.find((user) => user.id === socket.id);
+      if (removedUser) {
+        users = users.filter((user) => user.id !== socket.id);
+        const usersInRoom = roomUsers(removedUser.room);
+        io.to(removedUser.room).emit('users', usersInRoom);
+      }
+    })
+  });
 
   httpServer.once('error', (err) => {
     console.error(err);
