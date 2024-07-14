@@ -1,34 +1,16 @@
-
-import Canvas from "@/components/drawingCanvas/canvas";
 import styles from "./page.module.css";
-import ArtAside from "./components/artAside/artAside";
 
 export default function Home() {
   return (
-    <main>
+    <main className={styles.mainContent}>
       <h1 className={styles.title}>Co Art</h1>
-      <div className={styles.mainContent}>
-        <section className={styles.players}>
-          <div className={styles.player}>
-            <div className={styles.playerPic} />
-            <p>Player 1</p>
-          </div>
-          <div className={styles.player}>
-            <div className={styles.playerPic} />
-            <p>Player 2</p>
-          </div>
-          <div className={styles.player}>
-            <div className={styles.playerPic} />
-            <p>Player 3</p>
-          </div>
-          <div className={styles.player}>
-            <div className={styles.playerPic} />
-            <p>Player 4</p>
-          </div>
-        </section>
-        <Canvas />
-        <ArtAside />
-      </div>
+      <form action="" className={styles.form}>
+        <label htmlFor="name">Name</label>
+        <input type="text" id="name" name="name" />
+        <label htmlFor="room">Room</label>
+        <input type="text" id="room" name="room" />
+        <button type='submit'>Submit</button>
+      </form>
     </main>
   );
 }
