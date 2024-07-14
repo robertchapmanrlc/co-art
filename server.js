@@ -8,58 +8,61 @@ const port = 3000;
 
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
-let clearCanvasTimeout;
-let remainingTime = 30000;
 let broadcastInterval = 1000;
 
 let users = [];
+let rooms = {};
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer);
 
-  function startCanvasTimer() {
-    if (clearCanvasTimeout) {
-      clearTimeout(clearCanvasTimeout);
+  function startCanvasTimer(room) {
+    if (rooms[room]) {
+      if (rooms[room].clearCanvasTimeout) {
+        clearTimeout(rooms[room].clearCanvasTimeout);
+      }
+      rooms[room].remainingTime = 30000;
+      rooms[room].clearCanvasTimeout = setTimeout(() => {clearCanvas(room)}, rooms[room].remainingTime);
     }
-
-    remainingTime = 30000;
-    clearCanvasTimeout = setTimeout(clearCanvas, remainingTime);
   }
 
-  function clearCanvas() {
-    io.sockets.emit('clear');
-    startCanvasTimer();
+  function clearCanvas(room) {
+    io.to(room).emit('clear');
+    startCanvasTimer(room);
   }
 
   setInterval(() => {
-    if (remainingTime > 0) {
-      remainingTime -= broadcastInterval;
-      io.sockets.emit('display-time', remainingTime/1000);
+    for (let room in rooms) {
+      if (rooms[room].remainingTime >= 0) {
+        rooms[room].remainingTime -= 1000;
+        let remainingTime = rooms[room].remainingTime;
+        io.to(room).emit('display-time', remainingTime/1000)
+      }
     }
   }, broadcastInterval);
 
-  startCanvasTimer();
-
   io.on('connection', (socket) => {
-    socket.on('draw-line', ({ currentPoint, previousPoint, color }) => {
-      socket.broadcast.emit('draw-line', { currentPoint, previousPoint, color });
+    socket.on('draw-line', ({ currentPoint, previousPoint, color, room }) => {
+      io.to(room).emit('draw-line', { currentPoint, previousPoint, color });
     });
 
     socket.on('enter-room', ({name, room}) => {
       users = [...users, { name, room }];
       socket.join(room);
       const usersInRoom = roomUsers(room);
+      rooms[room] = {};
+      startCanvasTimer(room);
       io.to(room).emit('users', usersInRoom );
     });
 
-    socket.on('client-ready', () => {
-      socket.broadcast.emit('get-canvas-state');
+    socket.on('client-ready', (room) => {
+      io.to(room).emit('get-canvas-state');
     });
 
-    socket.on('canvas-state', (state) => {
-      socket.broadcast.emit('canvas-state-from-server', state);
+    socket.on('canvas-state', (state, room) => {
+      io.to(room).emit('canvas-state-from-server', state);
     });
   })
 

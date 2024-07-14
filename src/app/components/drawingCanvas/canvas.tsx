@@ -16,7 +16,7 @@ export default function Canvas() {
   const color = '#00F';
 
   function createLine({ context, previousPoint, currentPoint }: Draw) {
-    socket.emit('draw-line', ({ currentPoint, context, previousPoint, color }));
+    socket.emit('draw-line', ({ currentPoint, context, previousPoint, color, room }));
     drawLine({ context, currentPoint, previousPoint, color });
   }
 
@@ -28,7 +28,7 @@ export default function Canvas() {
 
     const context = canvasRef.current?.getContext('2d');
 
-    socket.emit("client-ready");
+    socket.emit("client-ready", room);
 
     socket.on('draw-line', ({ currentPoint, color, previousPoint }: DrawLineProps) => {
       if (!context) return;
@@ -37,7 +37,8 @@ export default function Canvas() {
 
     socket.on('get-canvas-state', () => {
       if (!canvasRef.current?.toDataURL()) return;
-      socket.emit("canvas-state", canvasRef.current.toDataURL());
+      const state = canvasRef.current.toDataURL()
+      socket.emit("canvas-state", ({state, room }));
     });
     
     socket.on("canvas-state-from-server", (state: string) => {
@@ -56,7 +57,7 @@ export default function Canvas() {
       socket.off('canvas-state-from-server');
       socket.off('clear');
     };
-  }, [canvasRef, clear]);
+  }, [canvasRef, clear, room]);
 
   return (
     <>
