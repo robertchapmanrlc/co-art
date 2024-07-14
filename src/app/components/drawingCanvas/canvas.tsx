@@ -5,8 +5,11 @@ import styles from './canvas.module.css';
 import { useDraw } from "@/hooks/useDraw";
 import { socket } from '../../../socket';
 import { drawLine } from '@/utils/drawLine';
+import { useUserContext } from '@/context/userContext';
 
 export default function Canvas() {
+
+  const { user: {name, room} } = useUserContext();
 
   const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
@@ -18,10 +21,14 @@ export default function Canvas() {
   }
 
   useEffect(() => {
+    socket.emit("enter-room", { name, room });
+  }, [name, room]);
+
+  useEffect(() => {
 
     const context = canvasRef.current?.getContext('2d');
 
-    socket.emit('client-ready');
+    socket.emit("client-ready");
 
     socket.on('draw-line', ({ currentPoint, color, previousPoint }: DrawLineProps) => {
       if (!context) return;

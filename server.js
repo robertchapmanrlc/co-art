@@ -12,6 +12,8 @@ let clearCanvasTimeout;
 let remainingTime = 30000;
 let broadcastInterval = 1000;
 
+let users = [];
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
@@ -45,6 +47,13 @@ app.prepare().then(() => {
       socket.broadcast.emit('draw-line', { currentPoint, previousPoint, color });
     });
 
+    socket.on('enter-room', ({name, room}) => {
+      users = [...users, { name, room }];
+      socket.join(room);
+      const usersInRoom = roomUsers(room);
+      io.to(room).emit('users', usersInRoom );
+    });
+
     socket.on('client-ready', () => {
       socket.broadcast.emit('get-canvas-state');
     });
@@ -61,3 +70,7 @@ app.prepare().then(() => {
     console.log(`> Ready on http://${hostname}:${port}`)
   })
 });
+
+function roomUsers(room) {
+  return users.filter((user) => user.room === room);
+}
