@@ -24,12 +24,14 @@ app.prepare().then(() => {
         clearTimeout(rooms[room].clearCanvasTimeout);
       }
       rooms[room].remainingTime = 30000;
-      rooms[room].clearCanvasTimeout = setTimeout(() => {clearCanvas(room)}, rooms[room].remainingTime);
+      rooms[room].clearCanvasTimeout = setTimeout(() => {
+        clearCanvas(room);
+      }, rooms[room].remainingTime);
     }
   }
 
   function clearCanvas(room) {
-    io.to(room).emit('clear');
+    io.to(room).emit("clear");
     startCanvasTimer(room);
   }
 
@@ -38,52 +40,58 @@ app.prepare().then(() => {
       if (rooms[room].remainingTime >= 0) {
         rooms[room].remainingTime -= 1000;
         let remainingTime = rooms[room].remainingTime;
-        io.to(room).emit('display-time', remainingTime/1000)
+        io.to(room).emit("display-time", remainingTime / 1000);
       }
     }
   }, broadcastInterval);
 
-  io.on('connection', (socket) => {
-    socket.on('draw-line', ({ currentPoint, previousPoint, color, room }) => {
-      io.to(room).emit('draw-line', { currentPoint, previousPoint, color });
+  io.on("connection", (socket) => {
+    socket.on("draw-line", ({ currentPoint, previousPoint, color, room }) => {
+      io.to(room).emit("draw-line", { currentPoint, previousPoint, color });
     });
 
-    socket.on('enter-room', ({ name, room }) => {
-      const id = socket.id
+    socket.on("enter-room", ({ name, room }) => {
+      const id = socket.id;
       if (!users.find((user) => user.id === id)) {
         users = [...users, { name, room, id }];
         socket.join(room);
         const usersInRoom = roomUsers(room);
-        rooms[room] = {};
-        startCanvasTimer(room);
-        io.to(room).emit('users', usersInRoom);
+        if (!rooms[room]) {
+          rooms[room] = {};
+        }
+        if (usersInRoom.length <= 1) {
+          startCanvasTimer(room);
+        }
+        io.to(room).emit("users", usersInRoom);
       }
     });
 
-    socket.on('client-ready', (room) => {
-      io.to(room).emit('get-canvas-state');
+    socket.on("client-ready", (room) => {
+      io.to(room).emit("get-canvas-state");
     });
 
-    socket.on('canvas-state', (state, room) => {
-      io.to(room).emit('canvas-state-from-server', state);
+    socket.on("canvas-state", (state, room) => {
+      io.to(room).emit("canvas-state-from-server", state);
     });
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       const removedUser = users.find((user) => user.id === socket.id);
       if (removedUser) {
         users = users.filter((user) => user.id !== socket.id);
         const usersInRoom = roomUsers(removedUser.room);
-        io.to(removedUser.room).emit('users', usersInRoom);
+        io.to(removedUser.room).emit("users", usersInRoom);
       }
-    })
+    });
   });
 
-  httpServer.once('error', (err) => {
-    console.error(err);
-    process.exit(1);
-  }).listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`)
-  })
+  httpServer
+    .once("error", (err) => {
+      console.error(err);
+      process.exit(1);
+    })
+    .listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`);
+    });
 });
 
 function roomUsers(room) {

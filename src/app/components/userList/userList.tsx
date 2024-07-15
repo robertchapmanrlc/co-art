@@ -13,10 +13,6 @@ export default function UserList() {
 
   useEffect(() => {
 
-    if (users.length <= 0) {
-      router.push("/");
-    }
-
     socket.on('users', (users) => {
       setUsers(users);
     });
@@ -25,6 +21,10 @@ export default function UserList() {
       socket.off('users');
     }
   }, [users, router]);
+
+  // if (users.length <= 0) {
+  //   router.push("/");
+  // }
 
   return (
     <section className={styles.players}>
