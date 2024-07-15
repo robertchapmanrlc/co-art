@@ -17,14 +17,15 @@ export default function UserList() {
       setUsers(users);
     });
 
+    socket.on("invalid-room", () => {
+      router.push('/');
+    });
+
     return () => {
       socket.off('users');
+      socket.off("invalid-room");
     }
   }, [users, router]);
-
-  // if (users.length <= 0) {
-  //   router.push("/");
-  // }
 
   return (
     <section className={styles.players}>

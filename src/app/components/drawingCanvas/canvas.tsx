@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import styles from './canvas.module.css';
 import { useDraw } from "@/hooks/useDraw";
 import { socket } from '../../../socket';

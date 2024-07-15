@@ -51,6 +51,10 @@ app.prepare().then(() => {
     });
 
     socket.on("enter-room", ({ name, room }) => {
+      if (room === '') {
+        socket.emit('invalid-room');
+        return;
+      }
       const id = socket.id;
       if (!users.find((user) => user.id === id)) {
         users = [...users, { name, room, id }];
