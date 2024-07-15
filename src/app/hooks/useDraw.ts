@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from "react";
 
 export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw) => void) => {
   const [mouseDown, setMouseDown] = useState(false);
+  const [canDraw, setCanDraw] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previousPoint = useRef<Point | null>(null);
 
   const onMouseDown = () => setMouseDown(true);
+
+  const enableDraw = () => setCanDraw(true);
+  const disableDraw = () => setCanDraw(false);
 
   const clear = () => {
     const canvas = canvasRef.current;
@@ -20,7 +24,7 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
   }
 
   useEffect(() => {
-    if (!mouseDown) return;
+    if (!mouseDown || !canDraw) return;
     const handleMovement = (e: MouseEvent) => {
       const currentPoint = computeCanvasPoint(e);
       
@@ -55,8 +59,8 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
       canvasRef.current?.removeEventListener('mousemove', handleMovement);
       window.removeEventListener('mouseup', mouseUpHandler);
     }
-  }, [mouseDown, onDraw])
+  }, [mouseDown, onDraw, canDraw])
   
 
-  return { canvasRef, onMouseDown, clear };
+  return { canvasRef, onMouseDown, clear, enableDraw, disableDraw };
 };

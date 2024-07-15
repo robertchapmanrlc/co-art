@@ -12,7 +12,7 @@ export default function Canvas() {
 
   const { user: {name, room} } = useUserContext();
 
-  const { canvasRef, onMouseDown, clear } = useDraw(createLine);
+  const { canvasRef, onMouseDown, clear, enableDraw, disableDraw } = useDraw(createLine);
 
   const color = '#0F0';
 
@@ -55,6 +55,14 @@ export default function Canvas() {
       }
     });
 
+    socket.on("enable-draw", () => {
+      enableDraw();
+    });
+
+    socket.on("disable-draw", () => {
+      disableDraw();
+    });
+
     socket.on('clear', clear);
 
     return () => {
@@ -62,8 +70,10 @@ export default function Canvas() {
       socket.off('get-canvas-state');
       socket.off('canvas-state-from-server');
       socket.off('clear');
+      socket.off('enable-draw');
+      socket.off('disable-draw');
     };
-  }, [canvasRef, clear, room]);
+  }, [canvasRef, clear, room, enableDraw, disableDraw]);
 
   return (
     <>

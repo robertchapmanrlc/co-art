@@ -41,6 +41,9 @@ app.prepare().then(() => {
         rooms[room].remainingTime -= 1000;
         let remainingTime = rooms[room].remainingTime;
         io.to(room).emit("display-time", remainingTime / 1000);
+        if (remainingTime < 20000) {
+          io.to(room).emit('enable-draw');
+        }
       }
     }
   }, broadcastInterval);
