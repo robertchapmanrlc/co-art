@@ -3,12 +3,20 @@
 import styles from "./userList.module.css";
 import { socket } from "../../../socket";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function UserList() {
 
   const [users, setUsers] = useState<User[]>([]);
 
+  const router = useRouter();
+
   useEffect(() => {
+
+    if (users.length <= 0) {
+      router.push("/");
+    }
+
     socket.on('users', (users) => {
       setUsers(users);
     });
@@ -16,7 +24,7 @@ export default function UserList() {
     return () => {
       socket.off('users');
     }
-  }, []);
+  }, [users, router]);
 
   return (
     <section className={styles.players}>
