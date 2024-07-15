@@ -53,8 +53,18 @@ app.prepare().then(() => {
       io.to(room).emit("draw-line", { currentPoint, previousPoint, color });
     });
 
+    socket.on('create-room', (room) => {
+      rooms[room] = {};
+      rooms[room].creater = socket.id;
+    });
+
+    socket.on('check-creator', (room) => {
+      let isCreator = rooms[room].creater === socket.id;
+      socket.emit('is-creator', isCreator);
+    });
+
     socket.on("enter-room", ({ name, room }) => {
-      if (room === '') {
+      if (room === '' || !rooms[room]) {
         socket.emit('invalid-room');
         return;
       }
@@ -63,9 +73,6 @@ app.prepare().then(() => {
         users = [...users, { name, room, id }];
         socket.join(room);
         const usersInRoom = roomUsers(room);
-        if (!rooms[room]) {
-          rooms[room] = {};
-        }
         if (usersInRoom.length <= 1) {
           startCanvasTimer(room);
         }
@@ -85,8 +92,12 @@ app.prepare().then(() => {
       const removedUser = users.find((user) => user.id === socket.id);
       if (removedUser) {
         users = users.filter((user) => user.id !== socket.id);
-        const usersInRoom = roomUsers(removedUser.room);
-        io.to(removedUser.room).emit("users", usersInRoom);
+        let room = removedUser.room;
+        const usersInRoom = roomUsers(room);
+        io.to(room).emit("users", usersInRoom);
+        if (usersInRoom.length == 0) {
+          delete rooms[room];
+        }
       }
     });
   });

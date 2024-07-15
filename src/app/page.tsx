@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useUserContext } from "./context/userContext";
 import styles from "./page.module.css";
+import { socket } from "../socket";
 
 export default function Home() {
 
@@ -19,7 +20,14 @@ export default function Home() {
   }
 
   const createRoom = (formData: FormData) => {
-    router.push('/');
+    const name = formData.get('name') as string;
+    let myuuid = crypto.randomUUID();
+
+    setUser({ name: name, room: myuuid });
+
+    socket.emit('create-room', myuuid);
+
+    router.push('/room');
   }
 
   return (

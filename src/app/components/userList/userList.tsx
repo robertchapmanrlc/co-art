@@ -4,12 +4,20 @@ import styles from "./userList.module.css";
 import { socket } from "../../../socket";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUserContext } from "@/context/userContext";
 
 export default function UserList() {
 
   const [users, setUsers] = useState<User[]>([]);
+  const [isCreator, setIsCreator] = useState(false);
+
+  const { user: { room } } = useUserContext();
 
   const router = useRouter();
+
+  useEffect(() => {
+    socket.emit('check-creator', room);
+  }, [room]);
 
   useEffect(() => {
 
@@ -21,11 +29,20 @@ export default function UserList() {
       router.push('/');
     });
 
+    socket.on('is-creator', (isCreator) => {
+      setIsCreator(isCreator);
+    });
+
     return () => {
       socket.off('users');
       socket.off("invalid-room");
+      socket.off('is-creator');
     }
   }, [users, router]);
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(room);
+  }
 
   return (
     <section className={styles.players}>
@@ -33,6 +50,7 @@ export default function UserList() {
         <div className={styles.playerPic} />
         <p>{user.name}</p>
       </div>))}
+      {isCreator && <button onClick={copyToClipboard} className={styles.clipboard}>Copy Room Id</button>}
     </section>
   );
 }
