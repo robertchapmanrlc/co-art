@@ -9,7 +9,7 @@ export default function Home() {
 
   const { setUser } = useUserContext();
 
-  const handleSubmit = (formData: FormData) => {
+  const joinRoom = (formData: FormData) => {
     const name = formData.get('name') as string;
     const room = formData.get('room') as string;
 
@@ -18,16 +18,31 @@ export default function Home() {
     router.push('/room');
   }
 
+  const createRoom = (formData: FormData) => {
+    router.push('/');
+  }
+
   return (
     <main className={styles.mainContent}>
       <h1 className={styles.title}>Co Art</h1>
-      <form action={handleSubmit} className={styles.form}>
-        <label htmlFor="name">Name</label>
-        <input required type="text" id="name" name="name" />
-        <label htmlFor="room">Room</label>
-        <input required type="text" id="room" name="room" />
-        <button type='submit'>Submit</button>
-      </form>
+      <p className={styles.description}>
+        Work together with friends to draw a picture. Create a room yourself or
+        join one
+      </p>
+      <div className={styles.forms}>
+        <form action={createRoom} className={styles.form}>
+          <label htmlFor="name">Name</label>
+          <input required type="text" id="name" name="name" />
+          <button type="submit">Create Room</button>
+        </form>
+        <form action={joinRoom} className={styles.form}>
+          <label htmlFor="name">Name</label>
+          <input required type="text" id="name" name="name" />
+          <label htmlFor="room">Room</label>
+          <input required type="text" id="room" name="room" />
+          <button type="submit">Join Room</button>
+        </form>
+      </div>
     </main>
   );
 }
