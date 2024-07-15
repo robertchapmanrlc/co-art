@@ -1,0 +1,21 @@
+.title {
+  margin-block: 1em;
+  text-align: center;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding-bottom: 3rem;
+}
+
+@media (width > 1000px) {
+  .mainContent {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0;
+  }
+}

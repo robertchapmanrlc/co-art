@@ -1,59 +1,44 @@
+.mainContent {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+}
+
 .title {
   margin-block: 1em;
   text-align: center;
 }
 
-.mainContent {
+
+.form {
   display: flex;
-  flex-direction: column-reverse;
+  width: 100%;
+  max-width: 50vw;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
-  padding-bottom: 3rem;
-}
-
-@media (width > 1000px) {
-  .mainContent {
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 0;
-  }
-}
-
-.players {
-  display: grid;
   gap: 1rem;
-  min-width: 250px;
+  background-color: #bb9edb66;
+  border-radius: 12px;
+  padding-block: 2rem;
 }
 
-.player {
-  border: 1px solid var(--clr-text);
-  border-radius: 8px;
-  max-height: 50px;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  padding-inline: 0.5rem;
-  padding-block: 0.7rem;
-  gap: 0.7rem;
+.form > input {
+  background-color: var(--clr-primary);
+  border: none;
+  border-radius: 5px;
+  padding-block: 0.5em;
+  padding-inline: 0.5em;
 }
 
-.playerPic {
-  border: 1px solid var(--clr-text);
-  padding: 15px;
-  border-radius: 50%;
+.form > button {
+  background-color: var(--clr-primary);
+  border-radius: 5px;
+  border: none;
+  padding-inline: 0.8em;
+  padding-block: 0.5em;
 }
 
-.drawingCanvas {
-  border: 2px solid var(--clr-text);
-  border-radius: 8px;
-}
-
-.art {
-  border: 2px solid var(--clr-text);
-  min-width: 200px;
-  min-height: 200px;
-  border-radius: 8px;
-  text-align: center;
-  align-content: center;
-}
