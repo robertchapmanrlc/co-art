@@ -6,6 +6,7 @@ import { useDraw } from "@/hooks/useDraw";
 import { socket } from '../../../socket';
 import { drawLine } from '@/utils/drawLine';
 import { useUserContext } from '@/context/userContext';
+import { canvasData } from '@/utils/pics';
 
 export default function Canvas() {
 
@@ -13,7 +14,7 @@ export default function Canvas() {
 
   const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
-  const color = '#00F';
+  const color = '#0F0';
 
   function createLine({ context, previousPoint, currentPoint }: Draw) {
     socket.emit('draw-line', ({ currentPoint, context, previousPoint, color, room }));
@@ -27,6 +28,11 @@ export default function Canvas() {
   useEffect(() => {
 
     const context = canvasRef.current?.getContext('2d');
+    const img = new Image();
+    img.src = canvasData[3];
+    img.onload = () => {
+      context?.drawImage(img, 0, 0);
+    };
 
     socket.emit("client-ready", room);
 

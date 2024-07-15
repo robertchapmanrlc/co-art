@@ -2,7 +2,7 @@
 
 export const drawLine = ({ currentPoint, previousPoint, context, color }: DrawLineProps) => {
   const { x: currentX, y: currentY } = currentPoint;
-  const lineWidth = 5;
+  const lineWidth = 25;
 
   const startPoint = previousPoint ?? currentPoint;
   context.beginPath();
@@ -14,6 +14,6 @@ export const drawLine = ({ currentPoint, previousPoint, context, color }: DrawLi
 
   context.fillStyle = color;
   context.beginPath();
-  context.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI);
+  context.arc(startPoint.x, startPoint.y, 13, 0, 13 * Math.PI);
   context.fill();
 };
