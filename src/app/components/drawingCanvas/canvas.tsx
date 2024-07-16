@@ -28,17 +28,20 @@ export default function Canvas() {
   useEffect(() => {
 
     const context = canvasRef.current?.getContext('2d');
-    const img = new Image();
-    img.src = canvasData[3];
-    img.onload = () => {
-      context?.drawImage(img, 0, 0);
-    };
 
     socket.emit("client-ready", room);
 
     socket.on('draw-line', ({ currentPoint, color, previousPoint }: DrawLineProps) => {
       if (!context) return;
       drawLine({ previousPoint, currentPoint, color, context });
+    });
+
+    socket.on('preview-drawing', (image) => {
+      const img = new Image();
+      img.src = canvasData[image];
+      img.onload = () => {
+        context?.drawImage(img, 0, 0);
+      };
     });
 
     socket.on('get-canvas-state', () => {
@@ -72,6 +75,7 @@ export default function Canvas() {
       socket.off('clear');
       socket.off('enable-draw');
       socket.off('disable-draw');
+      socket.off('preview-drawing');
     };
   }, [canvasRef, clear, room, enableDraw, disableDraw]);
 

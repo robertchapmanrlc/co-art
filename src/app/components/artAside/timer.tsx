@@ -5,7 +5,7 @@ import { socket } from "../../../socket";
 import styles from "./artAside.module.css";
 
 export default function Timer() {
-  const [remainingTime, setRemainingTime] = useState(0);
+  const [remainingTime, setRemainingTime] = useState(10);
 
   useEffect(() => {
     socket.on("display-time", (time: number) => {

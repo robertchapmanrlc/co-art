@@ -10,6 +10,7 @@ export default function UserList() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [isCreator, setIsCreator] = useState(false);
+  const [started, setStarted] = useState(false);
 
   const { user: { room } } = useUserContext();
 
@@ -44,12 +45,18 @@ export default function UserList() {
     await navigator.clipboard.writeText(room);
   }
 
+  const startGame = () => {
+    socket.emit("introduce-drawing", room);
+    setStarted(true);
+  }
+
   return (
     <section className={styles.players}>
       {users.map((user, i) => (<div key={user.name + i} className={styles.player}>
         <div className={styles.playerPic} />
         <p>{user.name}</p>
       </div>))}
+      {isCreator && !started && <button onClick={startGame} className={styles.startButton}>Start Game</button>}
       {isCreator && <button onClick={copyToClipboard} className={styles.clipboard}>Copy Room Id</button>}
     </section>
   );

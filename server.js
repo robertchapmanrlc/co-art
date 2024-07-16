@@ -22,7 +22,11 @@ app.prepare().then(() => {
       if (rooms[room].clearCanvasTimeout) {
         clearTimeout(rooms[room].clearCanvasTimeout);
       }
-      rooms[room].remainingTime = 30000;
+      if (rooms[room].started == true) {
+        rooms[room].remainingTime = 30000;
+      } else if (rooms[room].previewing == true) {
+        rooms[room].remainingTime = 10000;
+      }
       rooms[room].clearCanvasTimeout = setTimeout(() => {
         clearCanvas(room);
       }, rooms[room].remainingTime);
@@ -31,19 +35,28 @@ app.prepare().then(() => {
 
   function clearCanvas(room) {
     io.to(room).emit("clear");
+    if (rooms[room].previewing == true) {
+      io.to(room).emit("preview-drawing", rooms[room].drawing);
+      rooms[room].drawing = (rooms[room].drawing + 1) % 4;
+    }
     startCanvasTimer(room);
   }
 
   setInterval(() => {
     for (let room in rooms) {
-      if (rooms[room].remainingTime >= 0) {
+      if (rooms[room].remainingTime > 0 && (rooms[room].previewing == true || rooms[room].started == true)) {
         rooms[room].remainingTime -= 1000;
         let remainingTime = rooms[room].remainingTime;
         io.to(room).emit("display-time", remainingTime / 1000);
-        if (remainingTime < 20000) {
-          io.to(room).emit("enable-draw");
-        }
       }
+      if (rooms[room].remainingTime == 0 && rooms[room].previewing == true) {
+        rooms[room].previewing = false;
+        rooms[room].started = true;
+      } else if (rooms[room].remainingTime == 0 && rooms[room].started == true) {
+        rooms[room].previewing = true;
+        rooms[room].started = false;
+      }
+
     }
   }, broadcastInterval);
 
@@ -56,12 +69,21 @@ app.prepare().then(() => {
       rooms[room] = {};
       rooms[room].creater = socket.id;
       rooms[room].users = [];
+      rooms[room].started = false;
+      rooms[room].previewing = false;
+      rooms[room].drawing = 0;
     });
 
     socket.on("check-creator", (room) => {
       let isCreator = rooms[room].creater === socket.id;
       socket.emit("is-creator", isCreator);
     });
+
+    socket.on('introduce-drawing', (room) => {
+      rooms[room].previewing = true;
+      io.to(room).emit('preview-drawing', rooms[room].drawing);
+      rooms[room].drawing = (rooms[room].drawing + 1) % 4;
+    })
 
     socket.on("enter-room", ({ name, room }) => {
       if (room === "" || !rooms[room]) {
@@ -93,14 +115,16 @@ app.prepare().then(() => {
       let room = roomsArr.find((room) =>
         room[1].users.some((user) => user.id === socket.id)
       );
-      let roomUsers = room[1].users;
-      const removedUser = roomUsers.find((user) => user.id === socket.id);
-      if (removedUser) {
-        let usersLeft = roomUsers.filter((user) => user.id !== socket.id);
-        rooms[removedUser.room].users = usersLeft;
-        io.to(room).emit("users", usersLeft);
-        if (usersLeft.length == 0) {
-          delete rooms[removedUser.room];
+      if (room) {
+        let roomUsers = room[1].users;
+        const removedUser = roomUsers.find((user) => user.id === socket.id);
+        if (removedUser) {
+          let usersLeft = roomUsers.filter((user) => user.id !== socket.id);
+          rooms[removedUser.room].users = usersLeft;
+          io.to(room).emit("users", usersLeft);
+          if (usersLeft.length == 0) {
+            delete rooms[removedUser.room];
+          }
         }
       }
     });

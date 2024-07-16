@@ -23,6 +23,14 @@
 }
 
 .clipboard {
+  background-color: var(--clr-secondary);
+  border-radius: 5px;
+  border: none;
+  padding-inline: 0.8em;
+  padding-block: 0.5em;
+}
+
+.startButton {
   background-color: var(--clr-primary);
   border-radius: 5px;
   border: none;
