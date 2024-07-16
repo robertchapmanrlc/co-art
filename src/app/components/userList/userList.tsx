@@ -5,6 +5,7 @@ import { socket } from "../../../socket";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/userContext";
+import toast from "react-hot-toast";
 
 export default function UserList() {
 
@@ -34,10 +35,16 @@ export default function UserList() {
       setIsCreator(isCreator);
     });
 
+    socket.on('game-ended', () => {
+      toast.error("Game ended");
+      router.push('/');
+    })
+
     return () => {
       socket.off('users');
       socket.off("invalid-room");
       socket.off('is-creator');
+      socket.off('game-ended');
     }
   }, [users, router]);
 
@@ -46,8 +53,12 @@ export default function UserList() {
   }
 
   const startGame = () => {
-    socket.emit("introduce-drawing", room);
-    setStarted(true);
+    if (users.length > 1) {
+      socket.emit("introduce-drawing", room);
+      setStarted(true);
+    } else {
+      toast.error('Room must have at least 2 players');
+    }
   }
 
   return (

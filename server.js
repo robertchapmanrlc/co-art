@@ -39,14 +39,17 @@ app.prepare().then(() => {
       io.to(room).emit("preview-drawing", rooms[room].drawing);
       rooms[room].drawing = (rooms[room].drawing + 1) % 4;
     } else if (rooms[room].started == true) {
-      io.to(room).emit('enable-draw');
+      io.to(room).emit("enable-draw");
     }
     startCanvasTimer(room);
   }
 
   setInterval(() => {
     for (let room in rooms) {
-      if (rooms[room].remainingTime > 0 && (rooms[room].previewing == true || rooms[room].started == true)) {
+      if (
+        rooms[room].remainingTime > 0 &&
+        (rooms[room].previewing == true || rooms[room].started == true)
+      ) {
         rooms[room].remainingTime -= 1000;
         let remainingTime = rooms[room].remainingTime;
         io.to(room).emit("display-time", remainingTime / 1000);
@@ -54,12 +57,14 @@ app.prepare().then(() => {
       if (rooms[room].remainingTime == 0 && rooms[room].previewing == true) {
         rooms[room].previewing = false;
         rooms[room].started = true;
-      } else if (rooms[room].remainingTime == 0 && rooms[room].started == true) {
+      } else if (
+        rooms[room].remainingTime == 0 &&
+        rooms[room].started == true
+      ) {
         rooms[room].previewing = true;
         rooms[room].started = false;
         io.to(room).emit("disable-draw");
       }
-
     }
   }, broadcastInterval);
 
@@ -82,12 +87,12 @@ app.prepare().then(() => {
       socket.emit("is-creator", isCreator);
     });
 
-    socket.on('introduce-drawing', (room) => {
+    socket.on("introduce-drawing", (room) => {
       rooms[room].previewing = true;
-      io.to(room).emit('preview-drawing', rooms[room].drawing);
+      io.to(room).emit("preview-drawing", rooms[room].drawing);
       startCanvasTimer(room);
       rooms[room].drawing = (rooms[room].drawing + 1) % 4;
-    })
+    });
 
     socket.on("enter-room", ({ name, room }) => {
       if (room === "" || !rooms[room]) {
@@ -123,7 +128,14 @@ app.prepare().then(() => {
           let usersLeft = roomUsers.filter((user) => user.id !== socket.id);
           rooms[removedUser.room].users = usersLeft;
           io.to(room).emit("users", usersLeft);
-          if (usersLeft.length == 0) {
+          if (
+            (usersLeft.length < 2 &&
+              (rooms[removedUser.room].previewing ||
+                rooms[removedUser.room].started)) ||
+            socket.id === rooms[removedUser.room].creater
+          ) {
+            io.to(room).emit("game-ended");
+            clearTimeout(rooms[removedUser.room].clearCanvasTimeout);
             delete rooms[removedUser.room];
           }
         }
