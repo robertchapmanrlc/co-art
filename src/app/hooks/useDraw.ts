@@ -53,10 +53,12 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
     }
 
     canvasRef.current?.addEventListener('mousemove', handleMovement);
+    canvasRef.current?.addEventListener('mouseleave', mouseUpHandler);
     window.addEventListener('mouseup', mouseUpHandler);
 
     return () => {
       canvasRef.current?.removeEventListener('mousemove', handleMovement);
+      canvasRef.current?.removeEventListener('mouseleave', mouseUpHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
     }
   }, [mouseDown, onDraw, canDraw])
