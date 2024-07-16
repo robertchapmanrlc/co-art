@@ -10,7 +10,6 @@ const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 let broadcastInterval = 1000;
 
-let users = [];
 let rooms = {};
 
 app.prepare().then(() => {
@@ -42,7 +41,7 @@ app.prepare().then(() => {
         let remainingTime = rooms[room].remainingTime;
         io.to(room).emit("display-time", remainingTime / 1000);
         if (remainingTime < 20000) {
-          io.to(room).emit('enable-draw');
+          io.to(room).emit("enable-draw");
         }
       }
     }
@@ -53,30 +52,31 @@ app.prepare().then(() => {
       io.to(room).emit("draw-line", { currentPoint, previousPoint, color });
     });
 
-    socket.on('create-room', (room) => {
+    socket.on("create-room", (room) => {
       rooms[room] = {};
       rooms[room].creater = socket.id;
+      rooms[room].users = [];
     });
 
-    socket.on('check-creator', (room) => {
+    socket.on("check-creator", (room) => {
       let isCreator = rooms[room].creater === socket.id;
-      socket.emit('is-creator', isCreator);
+      socket.emit("is-creator", isCreator);
     });
 
     socket.on("enter-room", ({ name, room }) => {
-      if (room === '' || !rooms[room]) {
-        socket.emit('invalid-room');
+      if (room === "" || !rooms[room]) {
+        socket.emit("invalid-room");
         return;
       }
       const id = socket.id;
-      if (!users.find((user) => user.id === id)) {
-        users = [...users, { name, room, id }];
+      if (!rooms[room].users.find((user) => user.id === id)) {
+        let users = rooms[room].users;
+        rooms[room].users = [...users, { name, room, id }];
         socket.join(room);
-        const usersInRoom = roomUsers(room);
-        if (usersInRoom.length <= 1) {
+        if (users.length <= 1) {
           startCanvasTimer(room);
         }
-        io.to(room).emit("users", usersInRoom);
+        io.to(room).emit("users", rooms[room].users);
       }
     });
 
@@ -89,14 +89,18 @@ app.prepare().then(() => {
     });
 
     socket.on("disconnect", () => {
-      const removedUser = users.find((user) => user.id === socket.id);
+      let roomsArr = Object.entries(rooms);
+      let room = roomsArr.find((room) =>
+        room[1].users.some((user) => user.id === socket.id)
+      );
+      let roomUsers = room[1].users;
+      const removedUser = roomUsers.find((user) => user.id === socket.id);
       if (removedUser) {
-        users = users.filter((user) => user.id !== socket.id);
-        let room = removedUser.room;
-        const usersInRoom = roomUsers(room);
-        io.to(room).emit("users", usersInRoom);
-        if (usersInRoom.length == 0) {
-          delete rooms[room];
+        let usersLeft = roomUsers.filter((user) => user.id !== socket.id);
+        rooms[removedUser.room].users = usersLeft;
+        io.to(room).emit("users", usersLeft);
+        if (usersLeft.length == 0) {
+          delete rooms[removedUser.room];
         }
       }
     });
@@ -111,7 +115,3 @@ app.prepare().then(() => {
       console.log(`> Ready on http://${hostname}:${port}`);
     });
 });
-
-function roomUsers(room) {
-  return users.filter((user) => user.room === room);
-}
