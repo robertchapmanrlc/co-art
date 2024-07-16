@@ -38,6 +38,8 @@ app.prepare().then(() => {
     if (rooms[room].previewing == true) {
       io.to(room).emit("preview-drawing", rooms[room].drawing);
       rooms[room].drawing = (rooms[room].drawing + 1) % 4;
+    } else if (rooms[room].started == true) {
+      io.to(room).emit('enable-draw');
     }
     startCanvasTimer(room);
   }
@@ -55,6 +57,7 @@ app.prepare().then(() => {
       } else if (rooms[room].remainingTime == 0 && rooms[room].started == true) {
         rooms[room].previewing = true;
         rooms[room].started = false;
+        io.to(room).emit("disable-draw");
       }
 
     }
@@ -82,6 +85,7 @@ app.prepare().then(() => {
     socket.on('introduce-drawing', (room) => {
       rooms[room].previewing = true;
       io.to(room).emit('preview-drawing', rooms[room].drawing);
+      startCanvasTimer(room);
       rooms[room].drawing = (rooms[room].drawing + 1) % 4;
     })
 
@@ -95,9 +99,6 @@ app.prepare().then(() => {
         let users = rooms[room].users;
         rooms[room].users = [...users, { name, room, id }];
         socket.join(room);
-        if (users.length <= 1) {
-          startCanvasTimer(room);
-        }
         io.to(room).emit("users", rooms[room].users);
       }
     });
