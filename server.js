@@ -136,7 +136,18 @@ app.prepare().then(() => {
         if (removedUser) {
           let usersLeft = roomUsers.filter((user) => user.id !== socket.id);
           rooms[removedUser.room].users = usersLeft;
-          io.to(room).emit("users", usersLeft);
+          io.to(removedUser.room).emit("users", usersLeft);
+          let player = rooms[removedUser.room].playerDrawing;
+          let nextSocket =
+            rooms[removedUser.room].users[
+              (player + 1) % rooms[removedUser.room].users.length
+            ].id;
+          rooms[removedUser.room].playerDrawing =
+            (rooms[removedUser.room].playerDrawing + 1) %
+            rooms[removedUser.room].users.length;
+          if (rooms[removedUser.room].started == true) {
+            io.to(nextSocket).emit("enable-draw");
+          }
           if (
             (usersLeft.length < 2 &&
               (rooms[removedUser.room].previewing ||
