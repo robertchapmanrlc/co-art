@@ -35,8 +35,8 @@ export default function UserList() {
       setIsCreator(isCreator);
     });
 
-    socket.on('game-ended', () => {
-      toast.error("Game ended");
+    socket.on('game-suspended', () => {
+      toast.success("Game suspended");
       router.push('/');
     })
 
@@ -44,7 +44,7 @@ export default function UserList() {
       socket.off('users');
       socket.off("invalid-room");
       socket.off('is-creator');
-      socket.off('game-ended');
+      socket.off('game-suspended');
     }
   }, [users, router]);
 
