@@ -64,5 +64,5 @@ export const useDraw = (onDraw: ({ context, currentPoint, previousPoint }: Draw)
   }, [mouseDown, onDraw, canDraw])
   
 
-  return { canvasRef, onMouseDown, clear, enableDraw, disableDraw };
+  return { canvasRef, onMouseDown, clear, enableDraw, disableDraw, canDraw };
 };

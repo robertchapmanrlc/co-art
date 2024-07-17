@@ -23,7 +23,7 @@ app.prepare().then(() => {
         clearTimeout(rooms[room].clearCanvasTimeout);
       }
       if (rooms[room].started == true) {
-        rooms[room].remainingTime = 30000;
+        rooms[room].remainingTime = 31000;
       } else if (rooms[room].previewing == true) {
         rooms[room].remainingTime = 10000;
       }
@@ -38,8 +38,6 @@ app.prepare().then(() => {
     if (rooms[room].previewing == true) {
       io.to(room).emit("preview-drawing", rooms[room].drawing);
       rooms[room].drawing = (rooms[room].drawing + 1) % 4;
-    } else if (rooms[room].started == true) {
-      io.to(room).emit("enable-draw");
     }
     startCanvasTimer(room);
   }
@@ -53,6 +51,16 @@ app.prepare().then(() => {
         rooms[room].remainingTime -= 1000;
         let remainingTime = rooms[room].remainingTime;
         io.to(room).emit("display-time", remainingTime / 1000);
+      }
+      if (rooms[room].remainingTime % 3000 == 0 && rooms[room].started) {
+        let player = rooms[room].playerDrawing;
+        let currentSocket = rooms[room].users[player].id;
+        let nextSocket =
+          rooms[room].users[(player + 1) % rooms[room].users.length].id;
+        rooms[room].playerDrawing =
+          (rooms[room].playerDrawing + 1) % rooms[room].users.length;
+        io.to(currentSocket).emit("disable-draw");
+        io.to(nextSocket).emit("enable-draw");
       }
       if (rooms[room].remainingTime == 0 && rooms[room].previewing == true) {
         rooms[room].previewing = false;
@@ -80,6 +88,7 @@ app.prepare().then(() => {
       rooms[room].started = false;
       rooms[room].previewing = false;
       rooms[room].drawing = 0;
+      rooms[room].playerDrawing = 0;
     });
 
     socket.on("check-creator", (room) => {

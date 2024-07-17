@@ -12,7 +12,7 @@ export default function Canvas() {
 
   const { user: {name, room} } = useUserContext();
 
-  const { canvasRef, onMouseDown, clear, enableDraw, disableDraw } = useDraw(createLine);
+  const { canvasRef, onMouseDown, clear, enableDraw, disableDraw, canDraw} = useDraw(createLine);
 
   const color = '#0F0';
 
@@ -88,6 +88,7 @@ export default function Canvas() {
         height={400}
         className={styles.drawingCanvas}
       />
+      {canDraw && <p>Your turn to draw</p>}
     </>
   );
 }
