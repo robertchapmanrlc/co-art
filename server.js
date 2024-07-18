@@ -5,6 +5,7 @@ import express from "express";
 import http from "http";
 import { stringSimilarity } from "string-similarity-js";
 const app = express();
+const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 
 import { Server } from "socket.io";
@@ -222,6 +223,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3001, () => {
+server.listen(port, () => {
   console.log("✔️ Server listening on port 3001");
 });
