@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './canvas.module.css';
 import { useDraw } from "@/hooks/useDraw";
 import { socket } from '../../../socket';
@@ -9,10 +9,12 @@ import { useUserContext } from '@/context/userContext';
 import { canvasData } from '@/utils/pics';
 
 export default function Canvas() {
+  const [isCreator, setIsCreator] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const { user: {name, room} } = useUserContext();
 
-  const { canvasRef, onMouseDown, clear, enableDraw, disableDraw } = useDraw(createLine);
+  const { canvasRef, onMouseDown, clear, enableDraw, disableDraw, canDraw} = useDraw(createLine);
 
   const color = '#0F0';
 
@@ -23,22 +25,31 @@ export default function Canvas() {
 
   useEffect(() => {
     socket.emit("enter-room", { name, room });
+    socket.emit("check-creator", room);
   }, [name, room]);
 
   useEffect(() => {
 
     const context = canvasRef.current?.getContext('2d');
-    const img = new Image();
-    img.src = canvasData[3];
-    img.onload = () => {
-      context?.drawImage(img, 0, 0);
-    };
 
     socket.emit("client-ready", room);
+    
+    socket.on("is-creator", (isCreator) => {
+      setIsCreator(isCreator);
+    });
 
     socket.on('draw-line', ({ currentPoint, color, previousPoint }: DrawLineProps) => {
       if (!context) return;
       drawLine({ previousPoint, currentPoint, color, context });
+    });
+
+    socket.on('preview-drawing', (image) => {
+      setIsPreviewing(true);
+      const img = new Image();
+      img.src = canvasData[image];
+      img.onload = () => {
+        context?.drawImage(img, 0, 0);
+      };
     });
 
     socket.on('get-canvas-state', () => {
@@ -63,7 +74,18 @@ export default function Canvas() {
       disableDraw();
     });
 
-    socket.on('clear', clear);
+    socket.on('clear', () => {
+      if (isCreator) {
+        if (!canvasRef.current?.toDataURL()) return;
+        const state = canvasRef.current.toDataURL();
+        socket.emit('finished-drawing', ({state, room}));
+      }
+      clear();
+    });
+
+    socket.on("finished-preview", () => {
+      setIsPreviewing(false);
+    });
 
     return () => {
       socket.off('draw-line');
@@ -72,11 +94,14 @@ export default function Canvas() {
       socket.off('clear');
       socket.off('enable-draw');
       socket.off('disable-draw');
+      socket.off('preview-drawing');
+      socket.off("is-creator");
+      socket.off("finished-preview");
     };
-  }, [canvasRef, clear, room, enableDraw, disableDraw]);
+  }, [canvasRef, clear, room, enableDraw, disableDraw, isCreator]);
 
   return (
-    <>
+    <div className={styles.canvasContent}>
       <canvas
         ref={canvasRef}
         onMouseDown={onMouseDown}
@@ -84,6 +109,8 @@ export default function Canvas() {
         height={400}
         className={styles.drawingCanvas}
       />
-    </>
+      {canDraw && <p className={styles.text}>Your turn!</p>}
+      {isPreviewing && <p className={styles.text}>Preview</p>}
+    </div>
   );
 }

@@ -21,3 +21,35 @@
   padding: 15px;
   border-radius: 50%;
 }
+
+.clipboard {
+  background-color: var(--clr-secondary);
+  border-radius: 5px;
+  border: none;
+  padding-inline: 0.8em;
+  padding-block: 0.5em;
+}
+
+.clipboard:hover {
+  background-color: var(--clr-secondary-hover);
+}
+
+.clipboard:active {
+  background-color: var(--clr-secondary-active);
+}
+
+.startButton {
+  background-color: var(--clr-primary);
+  border-radius: 5px;
+  border: none;
+  padding-inline: 0.8em;
+  padding-block: 0.5em;
+}
+
+.startButton:hover {
+  background-color: var(--clr-primary-hover);
+}
+
+.startButton:active {
+  background-color: var(--clr-primary-active);
+}

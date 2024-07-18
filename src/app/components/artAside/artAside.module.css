@@ -5,15 +5,6 @@
   align-items: center;
 }
 
-.art {
-  border: 2px solid var(--clr-text);
-  min-width: 200px;
-  min-height: 200px;
-  border-radius: 8px;
-  text-align: center;
-  align-content: center;
-}
-
 .time {
   display: flex;
   justify-content: center;
@@ -24,4 +15,15 @@
   height: 100px;
   border: 2px solid var(--clr-text);
   border-radius: 1000%;
+}
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85em;
+}
+
+.score {
+  font-size: 1.2rem;
+  text-align: left;
 }
