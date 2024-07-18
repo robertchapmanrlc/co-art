@@ -58,6 +58,14 @@
   padding-block: 0.5em;
 }
 
+.form > button:hover {
+  background-color: var(--clr-primary-hover);
+}
+
+.form > button:active {
+  background-color: var(--clr-primary-active);
+}
+
 @media (width > 1000px) {
   .forms {
     flex-direction: row;
