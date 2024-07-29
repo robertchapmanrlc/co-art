@@ -22,3 +22,7 @@ pnpm start
 
 so the web socket functionality to work properly.
 
+## Built With
+* Next.js
+* TypeScript
+* Socket.io
